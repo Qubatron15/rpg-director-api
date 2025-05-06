@@ -22,15 +22,26 @@ app.get('/collections', async (req: Request, res: Response) => {
     const db = client.db();
     console.log('Using database:', db.databaseName);
     const collections = await db.listCollections().toArray();
-    // console.log('Collections found:', collections.map(c => c.name));
-    // res.json(collections.map(c => c.name));
-    res.json({ collections });
+    console.log('Collections found:', collections.map(c => c.name));
+    res.json(collections.map(c => c.name));
   } catch (err: any) {
     console.error('Error in /collections:', err);
     res.status(500).json({ error: err.message });
   } finally {
     await client.close();
     console.log('Closed MongoDB connection');
+  }
+});
+
+app.get('/dbinfo', async (req: Request, res: Response) => {
+  try {
+    await client.connect();
+    const db = client.db();
+    res.json({ databaseName: db.databaseName });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  } finally {
+    await client.close();
   }
 });
 
