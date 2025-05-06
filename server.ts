@@ -3,6 +3,7 @@ import { MongoClient } from 'mongodb';
 import config from './config';
 
 const app = express();
+console.log('Mongo URI:', config.mongoUri);
 const client = new MongoClient(config.mongoUri || '');
 
 app.use(express.json());
@@ -14,15 +15,22 @@ app.get('/ping', (req: Request, res: Response) => {
 });
 
 app.get('/collections', async (req: Request, res: Response) => {
+  console.log('Received GET /collections request');
   try {
     await client.connect();
+    console.log('Connected to MongoDB');
     const db = client.db();
+    console.log('Using database:', db.databaseName);
     const collections = await db.listCollections().toArray();
-    res.json(collections.map(c => c.name));
+    // console.log('Collections found:', collections.map(c => c.name));
+    // res.json(collections.map(c => c.name));
+    res.json({ collections });
   } catch (err: any) {
+    console.error('Error in /collections:', err);
     res.status(500).json({ error: err.message });
   } finally {
     await client.close();
+    console.log('Closed MongoDB connection');
   }
 });
 
